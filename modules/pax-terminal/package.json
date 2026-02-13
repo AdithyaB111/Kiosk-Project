@@ -1,0 +1,19 @@
+{
+  "name": "pax-terminal",
+  "version": "1.0.0",
+  "description": "Native module for PAX Terminal integration using BridgeComm",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test"
+  },
+  "keywords": ["react-native", "expo", "pax", "terminal"],
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

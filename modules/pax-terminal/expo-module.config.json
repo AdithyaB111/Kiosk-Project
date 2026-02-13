@@ -1,0 +1,17 @@
+{
+    "platforms": [
+        "ios",
+        "android",
+        "web"
+    ],
+    "ios": {
+        "modules": [
+            "PaxTerminalModule"
+        ]
+    },
+    "android": {
+        "modules": [
+            "expo.modules.paxterminal.PaxTerminalModule"
+        ]
+    }
+}

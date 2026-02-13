@@ -1,0 +1,23 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'expo.modules.paxterminal'
+version = '1.0.0'
+
+android {
+    compileSdkVersion 34
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 34
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-native:+'
+    implementation 'expo-modules-core'
+    // UNCOMMENT THE LINE BELOW AFTER ADDING THE PAX SDK JAR/AAR TO 'libs' FOLDER within this module or app's libs
+    // implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+}

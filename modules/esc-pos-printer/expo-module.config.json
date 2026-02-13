@@ -1,0 +1,17 @@
+{
+    "platforms": [
+        "ios",
+        "android",
+        "web"
+    ],
+    "ios": {
+        "modules": [
+            "EscPosPrinterModule"
+        ]
+    },
+    "android": {
+        "modules": [
+            "expo.modules.escposprinter.EscPosPrinterModule"
+        ]
+    }
+}

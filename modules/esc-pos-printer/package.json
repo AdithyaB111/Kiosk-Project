@@ -1,0 +1,27 @@
+{
+    "name": "esc-pos-printer",
+    "version": "1.0.0",
+    "description": "Native module for ESC/POS printer communication (USB/Serial/Network)",
+    "main": "index.ts",
+    "types": "index.ts",
+    "scripts": {
+        "build": "expo-module build",
+        "clean": "expo-module clean",
+        "lint": "expo-module lint",
+        "test": "expo-module test"
+    },
+    "keywords": [
+        "react-native",
+        "expo",
+        "escpos",
+        "printer",
+        "usb",
+        "serial",
+        "network"
+    ],
+    "peerDependencies": {
+        "expo": "*",
+        "react": "*",
+        "react-native": "*"
+    }
+}
