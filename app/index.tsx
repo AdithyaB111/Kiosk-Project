@@ -55,7 +55,7 @@ export default function WelcomeScreen() {
         );
         pulse.start();
 
-        // Glow animation
+
         const glow = Animated.loop(
             Animated.sequence([
                 Animated.timing(glowAnim, {
