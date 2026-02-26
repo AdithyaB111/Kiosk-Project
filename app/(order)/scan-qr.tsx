@@ -2,7 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useKiosk } from '../../src/store/kioskStore';
+import { useKiosk } from '@/src/store/kioskStore';
 
 export default function ScanQrScreen() {
     const router = useRouter();

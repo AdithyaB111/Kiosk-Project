@@ -14,9 +14,9 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useKiosk } from "../../src/store/kioskStore";
-import type { CartItem, Item } from "../../src/types";
-import { createModifierCartItem, formatCurrency } from "../../src/utils/cartUtils";
+import { useKiosk } from "@/src/store/kioskStore";
+import type { CartItem, Item } from "@/src/types";
+import { createModifierCartItem, formatCurrency } from "@/src/utils/cartUtils";
 
 const { width } = Dimensions.get("window");
 

@@ -1,87 +1,249 @@
 import { requireNativeModule } from 'expo-modules-core';
 
-// It loads the native module object from the JSI or requires it from the NativeModules proxy
+/**
+ * Load native module or fallback to mock for emulator/dev
+ */
 let PaxTerminalModule: any;
 try {
-    PaxTerminalModule = requireNativeModule('PaxTerminal');
+  PaxTerminalModule = requireNativeModule('PaxTerminal');
 } catch (e) {
-    console.warn('PaxTerminal native module not found. Using mock implementation.');
-    PaxTerminalModule = {
-        initialize: async () => {
-            console.warn('PaxTerminal.initialize called on mock (Success)');
-            return true;
+  console.warn('PaxTerminal native module not found. Using mock implementation.');
+  PaxTerminalModule = {
+    setTcpSetting: async (_ip: string, _port: number, _timeout: number) => {
+      console.warn('PaxTerminal.setTcpSetting mock');
+      return true;
+    },
+    init: async () => {
+      console.warn('PaxTerminal.init mock');
+      return JSON.stringify({ ResponseCode: '000000', ResponseMessage: 'OK' });
+    },
+    handshake: async () => {
+      console.warn('PaxTerminal.handshake mock');
+      return true;
+    },
+    doCredit: async (jsonStr: string) => {
+      console.warn('PaxTerminal.doCredit mock:', jsonStr);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const req = JSON.parse(jsonStr);
+      return JSON.stringify({
+        ResponseCode: '000000',
+        ResponseMessage: 'APPROVED',
+        hostInformation: {
+          hostResponseCode: '000000',
+          hostResponseMessage: 'APPROVED',
+          hostReferenceNumber: 'MOCK' + Date.now(),
+          authCode: 'MOCK' + Math.floor(Math.random() * 999999),
         },
-        processPayment: async (request: any) => {
-            console.warn('PaxTerminal.processPayment called on mock (Simulating Success)');
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
-            return {
-                status: 'APPROVED',
-                authCode: 'MOCK123',
-                referenceNumber: request.referenceNumber || 'REF' + Date.now(),
-                cardNumber: '************4242',
-                cardType: 'VISA',
-                approvedAmount: request.amount,
-                message: 'APPROVED'
-            };
+        accountInformation: {
+          account: '************4242',
+          cardType: 'VISA',
+          entryMode: Object.keys(req.TransactionBehavior?.EntryMode || {}).find(
+            key => (req.TransactionBehavior?.EntryMode as any)[key]
+          )?.toUpperCase() || 'MANUAL',
         },
-        voidTransaction: async () => {
-            console.warn('PaxTerminal.voidTransaction called on mock');
-            return { status: 'APPROVED' };
+        amountInformation: {
+          approvedAmount: req.amountInformation?.transactionAmount || '0',
         },
-        checkStatus: async () => {
-            console.warn('PaxTerminal.checkStatus called on mock');
-            return { status: 'READY', connected: true };
-        }
+      });
+    },
+    doGift: async (jsonStr: string) => {
+      console.warn('PaxTerminal.doGift mock:', jsonStr);
+      return PaxTerminalModule.doCredit(jsonStr);
+    },
+    cancel: async () => {
+      console.warn('PaxTerminal.cancel mock');
+    },
+    batchClose: async () => {
+      console.warn('PaxTerminal.batchClose mock');
+      return JSON.stringify({ ResponseCode: '000000', ResponseMessage: 'OK' });
+    },
+    remove: async () => {
+      console.warn('PaxTerminal.remove mock');
+    },
+    cameraScan: async ({ timeout, cameraType }: { timeout: number; cameraType: string }) => {
+      console.warn(`PaxTerminal.cameraScan mock: ${cameraType}, timeout ${timeout}s`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return 'MOCK_QR_123456';
+    },
+    getSdkVersion: async () => {
+      console.warn('PaxTerminal.getSdkVersion mock');
+      return 'Mock SDK v1.0.0';
+    },
+  };
+}
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+export interface TransactionEntryModeBitmap {
+  manual?: boolean;
+  swipe?: boolean;
+  chip?: boolean;
+  contactless?: boolean;
+  scan?: boolean;
+}
+
+export interface AmountInformation {
+  transactionAmount: string; // cents
+  tipAmount?: string;
+  cashbackAmount?: string;
+  taxAmount?: string;
+}
+
+export interface TraceInformation {
+  ecrReferenceNumber?: string;
+  transactionNumber?: string;
+}
+
+export interface TransactionBehavior {
+  EntryMode?: TransactionEntryModeBitmap;
+}
+
+export interface DoCreditRequest {
+  transactionType: string;
+  tenderType?: string;
+  amountInformation: AmountInformation;
+  traceInformation?: TraceInformation;
+  TransactionBehavior?: TransactionBehavior;
+}
+
+export interface POSLinkResponse {
+  responseCode: string;
+  responseMessage: string;
+  rawData: Record<string, any>;
+  isSuccess: boolean;
+}
+
+export type PaymentMethod = 'qr' | 'nfc' | 'swipe' | 'all';
+
+// ─── Entry Mode Presets ─────────────────────────────────────────────────────
+export const EntryModePresets: Record<PaymentMethod, TransactionEntryModeBitmap> = {
+  qr: { manual: false, swipe: false, chip: false, contactless: false, scan: true },
+  nfc: { manual: false, swipe: false, chip: false, contactless: true, scan: false },
+  swipe: { manual: false, swipe: true, chip: true, contactless: false, scan: false },
+  all: { manual: true, swipe: true, chip: true, contactless: true, scan: true },
+};
+
+// ─── Exported functions ─────────────────────────────────────────────────────
+
+export async function setTcpSetting(ip: string, port = 10009, timeout = 30): Promise<boolean> {
+  try {
+    return await PaxTerminalModule.setTcpSetting(ip, port, timeout);
+  } catch (e) {
+    console.error('setTcpSetting Error:', e);
+    return false;
+  }
+}
+
+export async function handshake(): Promise<boolean> {
+  try {
+    return await PaxTerminalModule.handshake();
+  } catch (e) {
+    console.error('handshake Error:', e);
+    return false;
+  }
+}
+
+export async function remove(): Promise<void> {
+  try {
+    await PaxTerminalModule.remove();
+  } catch (e) {
+    console.error('remove Error:', e);
+  }
+}
+
+export async function inputAccount(timeout: number = 30, edcType = 'CREDIT') {
+  try {
+    const req = {
+      edcType,
+      timeout: (timeout * 10).toString(), // convert to 100ms units
+      transactionType: 'SALE',
+      magneticSwipePinpadEnableFlag: 'ALLOWED',
+      manualPinpadEnableFlag: 'ALLOWED',
+      contactlessPinpadEnableFlag: edcType === 'GIFT' ? 'NOT_ALLOWED' : 'ALLOWED',
+      scannerPinpadEnableFlag: 'ALLOWED',
     };
+    const respStr = await PaxTerminalModule.inputAccount?.(JSON.stringify(req));
+    return respStr ? JSON.parse(respStr) : { ResponseCode: 'ERROR', ResponseMessage: 'Not Supported' };
+  } catch (e) {
+    console.error('inputAccount Error:', e);
+    return { ResponseCode: 'ERROR', ResponseMessage: String(e) };
+  }
 }
 
-export interface PaxPaymentRequest {
-    amount: number; // In cents or major unit depending on SDK, usually cents for int, but let's assume major unit (dollars) and convert in native
-    tip?: number;
-    transactionType: 'SALE' | 'RETURN' | 'VOID' | 'AUTH';
-    referenceNumber?: string;
-    extData?: string;
+export async function doCreditRequest(req: DoCreditRequest): Promise<POSLinkResponse> {
+  try {
+    const requestStr = JSON.stringify(req);
+    const respStr = await PaxTerminalModule.doCredit(requestStr);
+    return parseResponse(JSON.parse(respStr));
+  } catch (e) {
+    return { responseCode: 'ERROR', responseMessage: String(e), rawData: {}, isSuccess: false };
+  }
 }
 
-export interface PaxPaymentResponse {
-    status: 'APPROVED' | 'DECLINED' | 'ERROR' | 'TIMEOUT';
-    authCode?: string;
-    referenceNumber?: string; // Host Ref Num
-    cardNumber?: string; // Masked PAN
-    cardType?: string;
-    message?: string;
-    approvedAmount?: number;
-    rawResponse?: any; // Full JSON response from SDK
+export async function doGiftRequest(req: DoCreditRequest): Promise<POSLinkResponse> {
+  try {
+    const requestStr = JSON.stringify(req);
+    const respStr = await PaxTerminalModule.doGift(requestStr);
+    return parseResponse(JSON.parse(respStr));
+  } catch (e) {
+    return { responseCode: 'ERROR', responseMessage: String(e), rawData: {}, isSuccess: false };
+  }
 }
 
-/**
- * Initialize the connection to the PAX terminal
- * @param ip IP Address of the terminal
- * @param port Port number (default 10009)
- */
-export async function initialize(ip: string, port: number): Promise<boolean> {
-    return await PaxTerminalModule.initialize(ip, port);
+export async function batchClose(): Promise<POSLinkResponse> {
+  try {
+    const respStr = await PaxTerminalModule.batchClose();
+    return parseResponse(JSON.parse(respStr));
+  } catch (e) {
+    return { responseCode: 'ERROR', responseMessage: String(e), rawData: {}, isSuccess: false };
+  }
 }
 
-/**
- * Process a payment transaction on the PAX terminal
- * @param request Payment details
- */
-export async function processPayment(request: PaxPaymentRequest): Promise<PaxPaymentResponse> {
-    return await PaxTerminalModule.processPayment(request);
+export async function cameraScan(timeoutSeconds = 60, cameraType = 'REAR_CAMERA'): Promise<string | null> {
+  try {
+    return await PaxTerminalModule.cameraScan({ timeout: timeoutSeconds, cameraType });
+  } catch (e) {
+    console.error('cameraScan Error:', e);
+    return null;
+  }
 }
 
-/**
- * Void a transaction
- * @param originalRefNumber Original Host Reference Number to void
- */
-export async function voidTransaction(originalRefNumber: string): Promise<PaxPaymentResponse> {
-    return await PaxTerminalModule.voidTransaction(originalRefNumber);
+export async function cancel(): Promise<void> {
+  try {
+    await PaxTerminalModule.cancel();
+  } catch (e) {
+    console.error('cancel Error:', e);
+  }
 }
 
-/**
- * Get terminal status / check connection
- */
-export async function checkStatus(): Promise<{ status: string; connected: boolean }> {
-    return await PaxTerminalModule.checkStatus();
+export function parseResponse(json: Record<string, any>): POSLinkResponse {
+  let code = json.ResponseCode || json.responseCode || 'ERROR';
+  let msg = json.ResponseMessage || json.responseMessage || 'Unknown Error';
+
+  if (code === 'ERROR' && msg === 'Unknown Error') {
+    const hostInfo = json.hostInformation || json.HostInformation;
+    if (hostInfo) {
+      const hostMsg = hostInfo.hostResponseMessage || hostInfo.HostResponseMessage;
+      if (hostMsg) {
+        msg = String(hostMsg);
+        const hostCode = hostInfo.hostResponseCode || hostInfo.HostResponseCode;
+        code = hostCode || 'DECLINED';
+      }
+    }
+  }
+
+  return {
+    responseCode: code,
+    responseMessage: msg,
+    rawData: json,
+    isSuccess: code === '000000',
+  };
+}
+
+export function doCredit(requestStr: string) {
+    throw new Error('Function not implemented.');
+}
+
+
+export function doGift(arg0: string) {
+    throw new Error('Function not implemented.');
 }

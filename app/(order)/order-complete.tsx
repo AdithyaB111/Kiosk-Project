@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { useKiosk } from "../../src/store/kioskStore";
+import { useKiosk } from "@/src/store/kioskStore";
 
 const RESET_TIMEOUT_SECONDS = 15;
 

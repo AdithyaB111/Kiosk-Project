@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import "../global.css";
-import { KioskProvider } from "../src/store/kioskStore";
+import { KioskProvider } from "@/src/store/kioskStore";
 import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {

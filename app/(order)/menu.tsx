@@ -24,10 +24,10 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useInactivityTimer } from "../../src/hooks/useInactivityTimer";
-import { useKiosk } from "../../src/store/kioskStore";
-import type { Department, Item } from "../../src/types";
-import { formatCurrency } from "../../src/utils/cartUtils";
+import { useInactivityTimer } from "@/src/hooks/useInactivityTimer";
+import { useKiosk } from "@/src/store/kioskStore";
+import type { Department, Item } from "@/src/types";
+import { formatCurrency } from "@/src/utils/cartUtils";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const COLUMN_COUNT = 3;
@@ -88,7 +88,7 @@ export default function MenuScreen() {
         (item: Item) => {
             resetTimer();
             // Check if item has modifiers
-            const hasModifiers = state.modifiersOfItems.some(
+            const hasModifiers = (state.modifiersOfItems || []).some(
                 (m) => m.itemId === item.itemId
             );
 

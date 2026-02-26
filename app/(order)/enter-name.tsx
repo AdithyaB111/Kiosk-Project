@@ -15,7 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useKiosk } from "../../src/store/kioskStore";
+import { useKiosk } from "@/src/store/kioskStore";
 
 export default function EnterNameScreen() {
     const router = useRouter();

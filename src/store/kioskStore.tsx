@@ -28,9 +28,7 @@ import {
     calculateGrandTotal,
     generateUniqueId,
 } from '../utils/cartUtils';
-import { ApiService } from '../services/apiService';
-import { StorageService } from '../services/storageService';
-import { ConnectivityService } from '../services/connectivityService';
+import { ApiService, StorageService, ConnectivityService } from '../services';
 import { RuntimeConfig } from '../config/apiConfig';
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -270,11 +268,11 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
                 // Cache the data
                 await StorageService.cachePosData(posData);
 
-                const visibleDepts = posData.departments.filter(
-                    (d) => d.visible === 'OK' || d.visible === 'Y'
+                const visibleDepts = (posData.departments || []).filter(
+                    (d: any) => d.visible === 'OK' || d.visible === 'Y'
                 );
-                const visibleItems = posData.items.filter(
-                    (i) => (i.visible === 'OK' || i.visible === 'Y') && !i.isDeleted && !i.isModifier
+                const visibleItems = (posData.items || []).filter(
+                    (i: any) => (i.visible === 'OK' || i.visible === 'Y') && !i.isDeleted && !i.isModifier
                 );
 
                 dispatch({
@@ -282,8 +280,8 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
                     payload: {
                         departments: visibleDepts,
                         items: visibleItems,
-                        modifierGroups: posData.modifierGroups,
-                        modifiersOfItems: posData.modifiersOfItems,
+                        modifierGroups: posData.modifierGroups || [],
+                        modifiersOfItems: posData.modifiersOfItems || [],
                         businessInfo: posData.businessInfo[0] ?? null,
                         isDataLoaded: true,
                         isOnline: true,
@@ -369,7 +367,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
 
     const searchLoyaltyByPhone = useCallback(async (phone: string): Promise<LoyaltyCustomer | null> => {
         try {
-            const result = await ApiService.searchLoyaltyCustomer(phone);
+            const result = await ApiService.searchLoyaltyCustomer(phone) as any;
             if (result && result.id) {
                 return {
                     id: result.id,
@@ -386,14 +384,14 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
                 };
             }
             return null;
-        } catch {
+        } catch (e) {
             return null;
         }
     }, []);
 
     const searchLoyaltyByCard = useCallback(async (cardNumber: string): Promise<LoyaltyCustomer | null> => {
         try {
-            const result = await ApiService.searchLoyaltyByCard(cardNumber);
+            const result = await ApiService.searchLoyaltyByCard(cardNumber) as any;
             if (result && result.id) {
                 return {
                     id: result.id,
@@ -410,7 +408,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
                 };
             }
             return null;
-        } catch {
+        } catch (e) {
             return null;
         }
     }, []);
@@ -600,7 +598,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
 
     // ── Connectivity listener ──
     useEffect(() => {
-        const unsubscribe = ConnectivityService.addListener((isOnline) => {
+        const unsubscribe = ConnectivityService.addListener((isOnline: boolean) => {
             dispatch({ type: 'SET_ONLINE', payload: isOnline });
         });
         return unsubscribe;

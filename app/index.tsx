@@ -18,8 +18,8 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { StorageService } from "../src/services/storageService";
-import { useKiosk } from "../src/store/kioskStore";
+import { StorageService } from "@/src/services/storageService";
+import { useKiosk } from "@/src/store/kioskStore";
 
 const SETTINGS_TAP_COUNT = 5;
 const SETTINGS_TAP_WINDOW_MS = 3000;
@@ -153,13 +153,13 @@ export default function WelcomeScreen() {
             <View style={[styles.bgCircle, styles.bgCircle3]} />
 
             <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-                {/* Hidden Settings Tap Area (top-right) */}
+                {/* Settings Icon (top-right) */}
                 <TouchableOpacity
                     style={styles.settingsTapArea}
-                    onPress={handleSettingsTap}
-                    activeOpacity={1}
+                    onPress={() => router.push("/settings")}
+                    activeOpacity={0.7}
                 >
-                    <View />
+                    <Text style={styles.settingsIcon}>⚙️</Text>
                 </TouchableOpacity>
 
                 {/* Logo / Brand */}
@@ -289,11 +289,18 @@ const styles = StyleSheet.create({
     },
     settingsTapArea: {
         position: "absolute",
-        top: 0,
-        right: 0,
-        width: 100,
-        height: 100,
+        top: 20,
+        right: 20,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: "rgba(255,255,255,0.08)",
+        justifyContent: "center",
+        alignItems: "center",
         zIndex: 10,
+    },
+    settingsIcon: {
+        fontSize: 24,
     },
     brandContainer: {
         alignItems: "center",

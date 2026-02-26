@@ -12,7 +12,7 @@ import {
     Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { StorageService } from "../src/services/storageService";
+import { StorageService } from "@/src/services/storageService";
 
 const PIN_LENGTH = 4;
 

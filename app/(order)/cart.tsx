@@ -11,13 +11,13 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { useKiosk } from "../../src/store/kioskStore";
-import type { CartItem } from "../../src/types";
+import { useKiosk } from "@/src/store/kioskStore";
+import type { CartItem } from "@/src/types";
 import {
     formatCurrency,
     getItemPrice,
     getTotalPrice
-} from "../../src/utils/cartUtils";
+} from "@/src/utils/cartUtils";
 
 export default function CartScreen() {
     const router = useRouter();

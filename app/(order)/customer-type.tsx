@@ -15,7 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useKiosk } from "../../src/store/kioskStore";
+import { useKiosk } from "@/src/store/kioskStore";
 
 export default function CustomerTypeScreen() {
     const router = useRouter();
@@ -57,7 +57,7 @@ export default function CustomerTypeScreen() {
             } else {
                 setError("No member found with this number. Try again or continue as guest.");
             }
-        } catch {
+        } catch (e) {
             setError("Unable to search. Please try again or continue as guest.");
         } finally {
             setIsSearching(false);
